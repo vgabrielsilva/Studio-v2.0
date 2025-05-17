@@ -5,36 +5,30 @@ from PIL import Image, ImageTk
 import os
 import tkinter as tk
 import threading
-import json  # Adicionar import para manipulação de JSON
+import json
 
 
 
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / "assets" / "frame1"
-CONFIG_FILE = OUTPUT_PATH / "config.json"  # Arquivo de configuração
+CONFIG_FILE = OUTPUT_PATH / "config.json"
 
 
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
 
-
 window = Tk()
 
-#remover a barra de título
 window.overrideredirect(True)
-
-#definir as dimensões da janela
 window_width = 706
 window_height = 765
 
-#calcular a posição x e y para centralizar a janela
 screen_width = window.winfo_screenwidth()
 screen_height = window.winfo_screenheight()
 x = (screen_width // 2) - (window_width // 2)
 y = (screen_height // 2) - (window_height // 2)
 
-# Definir a geometria da janela
 window.geometry(f"{window_width}x{window_height}+{x}+{y}")
 window.configure(bg="#F4F4F4")
 
@@ -48,7 +42,6 @@ canvas = Canvas(
     relief="ridge"
 )
 
-# Variáveis para controle de movimento
 is_dragging = False
 start_x = 0
 start_y = 0
@@ -69,13 +62,6 @@ def on_button_release(event):
     global is_dragging
     is_dragging = False
 
-#
-#
-#
-
-#
-#
-#
 
 var_condicao = 0
 marca_dagua = None
@@ -95,35 +81,26 @@ def carregar_marca_dagua_salva():
             if caminho_arquivo and os.path.exists(caminho_arquivo):
                 imagem = Image.open(caminho_arquivo)
                 
-                # Definir o tamanho máximo
                 largura_maxima = 300
                 altura_maxima = 166
                 
-                # Obter as dimensões originais
                 largura_original, altura_original = imagem.size
                 
-                # Calcular a proporção
                 proporcao = min(largura_maxima / largura_original, altura_maxima / altura_original)
                 
-                # Calcular novas dimensões
                 nova_largura = int(largura_original * proporcao)
                 nova_altura = int(altura_original * proporcao)
                 
-                # Redimensionar a imagem proporcionalmente
                 imagem = imagem.resize((nova_largura, nova_altura), Image.LANCZOS)
                 imagem_tk = ImageTk.PhotoImage(imagem)
 
-                # Calcular a posição para centralizar a imagem
                 posicao_x = (largura_maxima - nova_largura) // 2 + 53
                 posicao_y = (altura_maxima - nova_altura) // 2 + 185
 
-                # Exibir a imagem no canvas
                 canvas.create_image(posicao_x, posicao_y, anchor="nw", image=imagem_tk)
 
-                # Manter uma referência da imagem para evitar que seja coletada pelo garbage collector
                 canvas.image = imagem_tk
-                
-                # Armazenar a marca d'água para uso posterior
+            
                 marca_dagua = imagem
 
 
@@ -132,39 +109,29 @@ def carregar_marca_dagua():
     global marca_dagua
     caminho_arquivo = filedialog.askopenfilename(filetypes=[("Arquivos PNG", "*.png")])
     if caminho_arquivo:
-        salvar_caminho_marca_dagua(caminho_arquivo)  # Salvar o caminho da marca d'água
-        # Carregar a imagem
+        salvar_caminho_marca_dagua(caminho_arquivo)
         imagem = Image.open(caminho_arquivo)
         
-        # Definir o tamanho máximo
         largura_maxima = 300
         altura_maxima = 166
         
-        # Obter as dimensões originais
         largura_original, altura_original = imagem.size
         
-        # Calcular a proporção
         proporcao = min(largura_maxima / largura_original, altura_maxima / altura_original)
-        
-        # Calcular novas dimensões
+
         nova_largura = int(largura_original * proporcao)
         nova_altura = int(altura_original * proporcao)
         
-        # Redimensionar a imagem proporcionalmente
         imagem = imagem.resize((nova_largura, nova_altura), Image.LANCZOS)
         imagem_tk = ImageTk.PhotoImage(imagem)
 
-        # Calcular a posição para centralizar a imagem
-        posicao_x = (largura_maxima - nova_largura) // 2 + 53  # +53 para ajustar a posição no canvas
-        posicao_y = (altura_maxima - nova_altura) // 2 + 185  # +185 para ajustar a posição no canvas
+        posicao_x = (largura_maxima - nova_largura) // 2 + 53 
+        posicao_y = (altura_maxima - nova_altura) // 2 + 185 
 
-        # Exibir a imagem no canvas
         canvas.create_image(posicao_x, posicao_y, anchor="nw", image=imagem_tk)
 
-        # Manter uma referência da imagem para evitar que seja coletada pelo garbage collector
         canvas.image = imagem_tk
         
-        # Armazenar a marca d'água para uso posterior
         marca_dagua = imagem
 
 
@@ -173,11 +140,11 @@ def carregar_marca_dagua():
 #função para abrir o explorador de arquivos e carregar múltiplas imagens
 def carregar_fotos():
     global file_paths
-    file_paths = filedialog.askopenfilenames(filetypes=[("All files", ".jpg"), ("All files", ".png")]) # formatos de arquivos disponíveis
+    file_paths = filedialog.askopenfilenames(filetypes=[("All files", ".jpg"), ("All files", ".png")])
     entry_2.config(state=NORMAL)
     entry_2.delete("1.0", "end")
     if file_paths:
-        canvas.delete("photo_names")  # Limpar qualquer texto existente
+        canvas.delete("photo_names")
         y = 440
         for file_path in file_paths:
             photo_name = Path(file_path).name
@@ -190,19 +157,16 @@ def carregar_fotos():
 def abrir_aviso(mensagem_de_erro):
     msg_erro = mensagem_de_erro
 
-    # Cria uma nova janela de aviso
     aviso = tk.Toplevel()
     aviso.title("Aviso")
     aviso.geometry("300x150")
     
-    # Centraliza a janela na tela
     largura = 300
     altura = 150
     x = (aviso.winfo_screenwidth() // 2) - (largura // 2)
     y = (aviso.winfo_screenheight() // 2) - (altura // 2)
     aviso.geometry(f"{largura}x{altura}+{x}+{y}")
 
-    # Adiciona uma mensagem à janela de aviso
     mensagem = tk.Label(aviso, text=msg_erro, font=("Poppins Medium", 10))
     mensagem.pack(pady=20)
     aviso.grab_set()
@@ -214,9 +178,9 @@ def abrir_aviso(mensagem_de_erro):
 
 def mostrar_na_pasta():
     janela_processamento.destroy()
-    if os.name == 'nt':  # Para Windows
+    if os.name == 'nt':  # para Windows
         os.startfile(pasta_destino)
-    elif os.name == 'posix':  # Para macOS ou Linux
+    elif os.name == 'posix':  # para macOS ou Linux
         os.system(f'open "{pasta_destino}"')
     else:
         tk.messagebox.showerror("Erro", "Sistema operacional não suportado.")
@@ -228,14 +192,12 @@ def mostrar_janela_processamento(status):
     janela_processamento.title("Processamento")
     janela_processamento.geometry("300x150")
 
-    # Centralizar a janela
     largura = 300
     altura = 150
     x = (janela_processamento.winfo_screenwidth() // 2) - (largura // 2)
     y = (janela_processamento.winfo_screenheight() // 2) - (altura // 2)
     janela_processamento.geometry(f"{largura}x{altura}+{x}+{y}")
 
-    # Adicionar texto inicial
     janela_processamento.label = tk.Label(
         janela_processamento,
         text=status,
@@ -260,8 +222,7 @@ def processar_imagens():
         mensagem_erro = "Nenhuma imagem selecionada."
         abrir_aviso(mensagem_erro)
         return
-    
-    # Obtendo o valor do slider
+
     porcentagem = valor_slider()
     
     if porcentagem == 0:
@@ -276,7 +237,7 @@ def processar_imagens():
         abrir_aviso(mensagem_erro)
         return
     
-    pasta_destino = escolher_pasta_destino()  # Definindo a pasta de destino aqui
+    pasta_destino = escolher_pasta_destino()
 
     def funcionar():
         global var_condicao
@@ -291,26 +252,22 @@ def processar_imagens():
 
         if 'janela_processamento' in globals():
             if var_condicao == 1:
-                # Atualizar a janela para "Tudo foi processado"
                 atualizar_janela_processamento("Processamento concluído.")
                 
-                # Adicionar o botão "Mostrar na pasta" dinamicamente
                 mostrar_fechar = tk.Button(janela_processamento, text="Fechar", command=janela_processamento.destroy)
                 mostrar_fechar.pack(pady=7)
                 mostrar_na_pasta_botao = tk.Button(janela_processamento, text="Mostrar na pasta", command=mostrar_na_pasta)
                 mostrar_na_pasta_botao.pack(pady=10)
             else:
-                # Verificar novamente após 100ms
                 janela_processamento.after(100, monitorar_processamento)
         else:
-            # Tentar novamente após um pequeno intervalo se a janela ainda não foi criada
             window.after(100, monitorar_processamento)
 
 
     def iniciar_processamento():
         thread = threading.Thread(target=funcionar)
         thread.start()
-        monitorar_processamento()  # Iniciar a verificação do status
+        monitorar_processamento()
 
     iniciar_processamento()
 
